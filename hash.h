@@ -13,6 +13,7 @@ functions:
     insert(KV)
     get(key)
     freeTable(table)
+    grow()
 */
 
 #ifndef HASH

@@ -15,15 +15,9 @@ Description: TODO
 #include <assert.h>
 #include "wordPairCounting.h"
 
-int main(int argc, char const *argv[])
-{
-    // must include at least one file name
-    assert(argc > 1);
-
+void parseArgs(table *ht, int argc, char const *argv[]) {
     unsigned long count = 0; // number of most-encountered word pairs to print
     short countEntered = 0; // whether the user has inputted a specified count
-
-    table *ht = initTable(256);
 
     // loop through args
     for (unsigned long ii = 1; ii < argc; ii++) {
@@ -57,6 +51,16 @@ int main(int argc, char const *argv[])
         // Print all word pairs
         printAllWordPairs(ht);
     }
+}
+
+int main(int argc, char const *argv[])
+{
+    // must include at least one file name
+    assert(argc > 1);
+
+    table *ht = initTable(256);
+
+    parseArgs(ht, argc, argv);
 
     freeTable(ht, free, free);
 

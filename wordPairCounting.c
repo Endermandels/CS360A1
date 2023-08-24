@@ -73,7 +73,13 @@ void readFile(table *ht, char *fn) {
 }
 
 void printAllWordPairs(table *ht) {
-    puts("Word Pairs");
+    for (unsigned long ii = 0; ii < ht->size; ii++) {
+        kv *entry = ht->array[ii];
+
+        if (entry) {
+            printf("%10d %s\n", ((occ*)entry->val)->x, entry->key);
+        }
+    }
 }
 
 void printWordPairs(table *ht, unsigned long count) {
