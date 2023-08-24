@@ -16,12 +16,25 @@ Description: TODO
 
 // Occurances of a word pair
 typedef struct OCCURANCES {
-    unsigned int x;
+    unsigned long x;
 } occ;
 
-void readFile(table *ht, char *fn);
-void printAllWordPairs(table *ht); // Print all entries in hash table
-void printWordPairs(table *ht, unsigned long count); // Print out <count> of the most-encountered word pairs.
+/*
+Read the file located at fn.
+
+@return success (0), failure (1)
+*/
+int readFile(table *ht, char *fn);
+
+/*
+Print all entries in hash table in decreasing order of occurance.
+*/
+void printAllWordPairs(table *ht);
+
+/*
+Print out <count> of the most-encountered word pairs in decreasing order of occurance.
+*/
+void printWordPairs(table *ht, unsigned long count);
 
 
 #endif

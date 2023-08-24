@@ -21,7 +21,7 @@ typedef struct KV {
 
 // Hash table
 typedef struct TABLE {
-    struct KV *array; // Array of KV entries
+    struct KV **array; // Array of KV entries
     float avgNumCollisions; // Stat for when to grow table
     unsigned long numEntries; // Stat for when to grow table
     unsigned long size; // Size of array
@@ -36,8 +36,17 @@ If <size> is 0, use the default size of 256.
 table* initTable(unsigned long size);
 
 /*
-Free <ht> and all entries inside <ht>.
+Insert new entry to hash table.
+
+@return success (0), failure (1)
 */
-void freeTable(table *ht);
+int insert(table *ht, kv *entry);
+
+/*
+Free <ht> and all entries inside <ht>.
+<freeKey> will be used to free the keys.
+Use free() for char * and NULL for const char *.
+*/
+void freeTable(table *ht, void freeKey(void *__ptr));
 
 #endif

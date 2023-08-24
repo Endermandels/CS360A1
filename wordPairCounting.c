@@ -11,28 +11,79 @@ Description: TODO
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "wordPairCounting.h"
 #include "getWord.h"
 
-/*
-Read the file located at fn.
-*/
-void readFile(table *ht, char *fn) {
-    assert(fn);
+int readFile(table *ht, char *fn) {
+    if (!fn) {
+        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
+        return 1;
+    }
 
     FILE *fd = fopen(fn, "r");
-    assert(fd);
+    if (!fd) {
+        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
+        return 1;
+    }
+
+    char *w1 = getNextWord(fd);
+    char *w2 = NULL;
+
+    int TEMP = 100;
+    // Read Word Pairs
+    while (1) {
+        w2 = getNextWord(fd);
+
+        if (!w2) {
+            // EOF
+            break;
+        }
+
+        // Init entry
+        kv *entry = NULL;
+        entry = (kv*)malloc(sizeof(kv));
+        assert(entry);
+
+        entry->key = NULL;
+        entry->val = NULL;
+        entry->next = NULL;
+
+        occ *count = NULL;
+        count = (occ*)malloc(sizeof(occ));
+        assert(count);
+        count->x = 1;
+        entry->val = count;
+
+        char *temp = NULL;
+        temp = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
+        assert(temp);
+        strcpy(temp, w1);
+        strcat(temp, " "); // Possible error: no end '\0'
+        strcat(temp, w2);
+        puts(temp);
+        
+        entry->key = temp;
+
+        insert(ht, entry);
+
+        free(w1);
+        w1 = w2;
+    }
+
+    if (w1){
+        free(w1);
+    }
 
     fclose(fd);
+    return 0;
 }
 
-// Print all entries in hash table
 void printAllWordPairs(table *ht) {
     puts("Word Pairs");
 }
 
-// Print out <count> of the most-encountered word pairs.
 void printWordPairs(table *ht, unsigned long count) {
     for (unsigned long ii = 0; ii < count; ii++){
         puts("Word Pairs");

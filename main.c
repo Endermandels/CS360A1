@@ -11,6 +11,7 @@ Description: TODO
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "wordPairCounting.h"
 
@@ -25,19 +26,39 @@ int main(int argc, char const *argv[])
     unsigned long count = 0; // number of most-encountered word pairs to print
     short countEntered = 0; // whether the user has inputted a specified count
 
-    table *ht = initTable(1);
-    assert(ht);
+    table *ht = initTable(256);
 
     // loop through args
-    for (int ii = 1; ii < argc; ii++) {
+    for (unsigned long ii = 1; ii < argc; ii++) {
         char *arg = argv[ii];
         if (arg[0] == '-') {
+            // -count must not be empty
+            if (strlen(arg) == 1) {
+                fprintf(stderr, "-count must contain a positive integer: arg %ld: %s\n", ii, arg);
+                continue;
+            }
+
             // -count must be first argument, if specified
             if (ii > 1) {
                 // error
-                fprintf(stderr, "-count must be first argument.  %s as arg %d\n", arg, ii);
+                fprintf(stderr, "-count must be first argument: arg %ld: %s\n", ii, arg);
                 continue;
             } else {
+                // check if count is a valid number
+                unsigned long len = strlen(arg);
+                short toContinue = 0;
+                for (unsigned long jj = 1; jj < len; jj++) {
+                    if (arg[jj] < '0' || arg[jj] > '9') {
+                        // not a valid number
+                        fprintf(stderr, "-count must be a positive integer: arg %ld: %s\n", jj, arg);
+                        toContinue = 1;
+                        break;
+                    }
+                }
+                if (toContinue) {
+                    continue;
+                }
+
                 // register count
                 count = atoi(arg+1); // arg+1 excludes '-'
                 countEntered = 1;
@@ -55,7 +76,7 @@ int main(int argc, char const *argv[])
         printAllWordPairs(ht);
     }
 
-    freeTable(ht);
+    freeTable(ht, free);
 
     return 0;
 }
