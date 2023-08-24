@@ -16,68 +16,60 @@ Description: TODO
 #include "wordPairCounting.h"
 #include "getWord.h"
 
-int readFile(table *ht, char *fn) {
-    if (!fn) {
-        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
-        return 1;
-    }
-
-    FILE *fd = fopen(fn, "r");
-    if (!fd) {
-        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
-        return 1;
-    }
-
-    char *w1 = getNextWord(fd);
-    char *w2 = NULL;
-
-    int TEMP = 100;
-    // Read Word Pairs
-    while (1) {
-        w2 = getNextWord(fd);
-
-        if (!w2) {
-            // EOF
-            break;
-        }
-
+kv *newEntry(char *w1, char *w2) {
         // Init entry
         kv *entry = NULL;
-        entry = (kv*)malloc(sizeof(kv));
-        assert(entry);
+        while (!entry) entry = (kv*)malloc(sizeof(kv));
 
         entry->key = NULL;
         entry->val = NULL;
         entry->next = NULL;
 
+        // Key
+        char *temp = NULL;
+        while (!temp) temp = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
+
+        // Join word 1 to word 2 with a space in between
+        strcpy(temp, w1);
+        strcat(temp, " ");
+        strcat(temp, w2);
+
+        entry->key = temp;
+
+        // Occurance
         occ *count = NULL;
-        count = (occ*)malloc(sizeof(occ));
-        assert(count);
+        while (!count) count = (occ*)malloc(sizeof(occ));
         count->x = 1;
         entry->val = count;
 
-        char *temp = NULL;
-        temp = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
-        assert(temp);
-        strcpy(temp, w1);
-        strcat(temp, " "); // Possible error: no end '\0'
-        strcat(temp, w2);
-        puts(temp);
-        
-        entry->key = temp;
+        return entry;
+}
 
-        insert(ht, entry);
+void readWordPairs(table *ht, FILE *fd) {
+    char *w1 = getNextWord(fd);
+    char *w2 = getNextWord(fd);
 
-        free(w1);
+    while (w2) {
+        insert(ht, newEntry(w1, w2));
+        free(w1); // free w1 since it is malloc'd memory
         w1 = w2;
+        w2 = getNextWord(fd);
     }
 
     if (w1){
         free(w1);
     }
+}
+
+void readFile(table *ht, char *fn) {
+    assert(fn);
+
+    FILE *fd = fopen(fn, "r");
+    assert(fd);
+
+    readWordPairs(ht, fd);
 
     fclose(fd);
-    return 0;
 }
 
 void printAllWordPairs(table *ht) {

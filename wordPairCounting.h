@@ -21,10 +21,9 @@ typedef struct OCCURANCES {
 
 /*
 Read the file located at fn.
-
-@return success (0), failure (1)
+Load word pairs as key-value pairs into hashtable <ht>.
 */
-int readFile(table *ht, char *fn);
+void readFile(table *ht, char *fn);
 
 /*
 Print all entries in hash table in decreasing order of occurance.

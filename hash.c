@@ -11,14 +11,14 @@ Description: TODO
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "crc64.h" // Contains hash code function
 #include "hash.h"
 
 table* initTable(unsigned long size) {
     table *ht = NULL;
-    ht = (table*)malloc(sizeof(table));
-    assert(ht);
+    while (!ht) ht = (table*)malloc(sizeof(table));
 
     ht->array = NULL;
     ht->avgNumCollisions = 0;
@@ -30,8 +30,7 @@ table* initTable(unsigned long size) {
         ht->size = size;
     }
 
-    ht->array = (kv**)malloc(sizeof(kv*)*ht->size);
-    assert(ht->array);
+    while (!ht->array) ht->array = (kv**)malloc(sizeof(kv*)*ht->size);
 
     for (unsigned long ii = 0; ii < ht->size; ii++) {
         ht->array[ii] = NULL;
@@ -40,22 +39,30 @@ table* initTable(unsigned long size) {
     return ht;
 }
 
-int insert(table *ht, kv *entry) {
-    if (!ht) {
-        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
-        return 1;
-    }
-    if (!entry) {
-        fprintf(stderr, "NULL Pointer: %s: %d\n", __FILE__, __LINE__);
-        return 1;
-    }
+void insert(table *ht, kv *entry) {
+    assert(ht);
+    assert(entry);
 
     printf("key: %s\n", entry->key);
 
     ht->array[ht->numEntries++] = entry;
 }
 
-void freeTable(table *ht, void freeKey(void* __ptr)) {
+void *get(table *ht, char *key) {
+    assert(ht);
+    assert(key);
+
+    // loop through table for key
+    for (unsigned long ii = 0; ii < ht->size; ii++) {
+        if (!strcmp(ht->array[ii]->key, key)) {
+            return ht->array[ii];
+        }
+    }
+
+    return NULL;
+}
+
+void freeTable(table *ht, void freeKey(void *__ptr), void freeVal(void *__ptr)) {
     // Free array entries
     for (unsigned long ii = 0; ii < ht->size; ii++) {
         // Free entries in linked list
@@ -64,8 +71,8 @@ void freeTable(table *ht, void freeKey(void* __ptr)) {
             if (entry->key && freeKey) {
                 freeKey(entry->key);
             }
-            if (entry->val) {
-                free(entry->val);
+            if (entry->val && freeVal) {
+                freeVal(entry->val);
             }
 
             kv *next = entry->next;
