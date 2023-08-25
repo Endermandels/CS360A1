@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
     // must include at least one file name
     assert(argc > 1);
 
-    table *ht = initTable(256);
+    table *ht = initTable(20);
 
     parseArgs(ht, argc, argv);
 

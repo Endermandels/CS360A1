@@ -1,5 +1,5 @@
 EXEC = pairsofwords
-OBJS = main.o wordPairCounting.o hash.o getWord.o
+OBJS = main.o wordPairCounting.o hash.o getWord.o crc64.o
 FLAGS = gcc
 
 $(EXEC): $(OBJS)
@@ -16,6 +16,9 @@ hash.o: hash.c
 
 getWord.o: getWord.c
 	$(FLAGS) -c getWord.c
+
+crc64.o: crc64.c
+	$(FLAGS) -c crc64.c
 
 run: $(EXEC)
 	./$(EXEC)

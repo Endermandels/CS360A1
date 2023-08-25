@@ -29,9 +29,10 @@ typedef struct KV {
 // Hash table
 typedef struct TABLE {
     struct KV **array; // Array of KV entries
-    float avgNumCollisions; // Stat for when to grow table
-    unsigned long numEntries; // Stat for when to grow table
     unsigned long size; // Size of array
+    float avgNumCollisions; // Stat for when to grow table
+    unsigned long numCollisions; // Stat for when to grow table
+    unsigned long numEntries; // Stat for when to grow table
 } table;
 
 /*
@@ -43,9 +44,12 @@ If <size> is 0, use the default size of 256.
 table* initTable(unsigned long size);
 
 /*
-Insert new entry to hash table.
+Hash new entry into hash table.
+If an entry in the hash table with the same key as the new entry already exists,
+    perform <sameKey>, which should return the new value of the existing entry.
 */
-void insert(table *ht, kv *entry);
+void insert(table *ht, kv *entry, void *sameKey(void *v1, void *v2),
+    void freeKey(void *_ptr), void freeVal(void *_ptr));
 
 /*
 Get the value indicated by the specified key stored in the table.

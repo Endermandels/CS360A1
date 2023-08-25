@@ -39,15 +39,45 @@ table* initTable(unsigned long size) {
     return ht;
 }
 
-void insert(table *ht, kv *entry) {
+void insert(table *ht, kv *entry, void *sameKey(void *v1, void *v2), 
+        void freeKey(void *_ptr), void freeVal(void *_ptr)) {
     assert(ht);
     assert(entry);
 
-    printf("key: %s\n", entry->key);
+    // hash into ht
+    unsigned long index = crc64(entry->key) % ht->size;
 
-    ht->array[ht->numEntries++] = entry;
+    printf("inserting key <%s> at index <%ld>\n", entry->key, index);
+
+    kv *existing = ht->array[index];
+    if (existing) {
+        // go to end of existing's linked list
+        while (existing) {
+            if (!strcmp(existing->key, entry->key)) {
+                // perform sameKey on existing and entry values
+                if (sameKey) existing->val = sameKey(existing->val, entry->val);
+                if (freeKey && entry->key) freeKey(entry->key);
+                if (freeVal && entry->val) freeVal(entry->val);
+                free(entry);
+                break;
+            } else if (!existing->next) {
+                // collision
+                existing->next = entry;
+                ht->numCollisions++;
+                break;
+            }
+
+            existing = existing->next;
+        }
+    } else {
+        // add new entry to array
+        ht->array[index] = entry;
+    }
+
+    ht->numEntries++;
 }
 
+// UNUSED
 void *get(table *ht, char *key) {
     assert(ht);
     assert(key);
@@ -68,13 +98,8 @@ void freeTable(table *ht, void freeKey(void *__ptr), void freeVal(void *__ptr)) 
         // Free entries in linked list
         kv *entry = ht->array[ii];
         while (entry) {
-            if (entry->key && freeKey) {
-                freeKey(entry->key);
-            }
-            if (entry->val && freeVal) {
-                freeVal(entry->val);
-            }
-
+            if (freeKey && entry->key) freeKey(entry->key);
+            if (freeVal && entry->val) freeVal(entry->val);
             kv *next = entry->next;
             free(entry);
             entry = next;
