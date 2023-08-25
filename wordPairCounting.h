@@ -26,14 +26,15 @@ Load word pairs as key-value pairs into hashtable <ht>.
 void readFile(table *ht, char *fn);
 
 /*
-Print all entries in hash table in decreasing order of occurance.
+Convert the hash table <ht> to an array sorted in decreasing order of occurance.
+
+@return sorted array
 */
-void printAllWordPairs(table *ht);
+kv** convertHashTableToSortedArray(table *ht);
 
 /*
-Print out <count> of the most-encountered word pairs in decreasing order of occurance.
+Print <size> entries in array in decreasing order of occurance.
 */
-void printWordPairs(table *ht, unsigned long count);
-
+void printWordPairs(kv **arr, unsigned long size);
 
 #endif

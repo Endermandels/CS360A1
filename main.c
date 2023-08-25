@@ -14,9 +14,11 @@ Description: TODO
 #include <string.h>
 #include <assert.h>
 #include "wordPairCounting.h"
+#define min(x,y) ((x)<(y))?(x):(y)
+
 
 void parseArgs(table *ht, int argc, char const *argv[]) {
-    unsigned long count = 0; // number of most-encountered word pairs to print
+    unsigned long count = 100; // number of most-encountered word pairs to print
     short countEntered = 0; // whether the user has inputted a specified count
 
     // loop through args
@@ -31,7 +33,6 @@ void parseArgs(table *ht, int argc, char const *argv[]) {
 
             // check if count is a valid number
             unsigned long len = strlen(arg);
-            short toContinue = 0;
             for (unsigned long jj = 1; jj < len; jj++) {
                 assert(arg[jj] >= '0' && arg[jj] <= '9');
             }
@@ -44,13 +45,19 @@ void parseArgs(table *ht, int argc, char const *argv[]) {
         }
     }
 
+    kv **arr = convertHashTableToSortedArray(ht);
+
     if (countEntered) {
-        // User entered a specified count
-        printWordPairs(ht, count);
+        puts("count");
+        // Print <count> word pairs
+        printWordPairs(arr, min(count, ht->numEntries));
     } else {
+        puts("num entries");
         // Print all word pairs
-        printAllWordPairs(ht);
+        printWordPairs(arr, ht->numEntries);
     }
+
+    free(arr);
 }
 
 int main(int argc, char const *argv[])

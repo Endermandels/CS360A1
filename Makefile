@@ -29,6 +29,9 @@ runv: $(EXEC)
 runv0: $(EXEC)
 	valgrind ./$(EXEC) test.txt
 
+runv01: $(EXEC)
+	valgrind ./$(EXEC) -3 test.txt
+
 runv1: $(EXEC)
 	valgrind ./$(EXEC) gettysburg.txt
 

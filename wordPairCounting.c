@@ -17,32 +17,32 @@ Description: TODO
 #include "getWord.h"
 
 kv *newEntry(char *w1, char *w2) {
-        // Init entry
-        kv *entry = NULL;
-        while (!entry) entry = (kv*)malloc(sizeof(kv));
+    // Init entry
+    kv *entry = NULL;
+    while (!entry) entry = (kv*)malloc(sizeof(kv));
 
-        entry->key = NULL;
-        entry->val = NULL;
-        entry->next = NULL;
+    entry->key = NULL;
+    entry->val = NULL;
+    entry->next = NULL;
 
-        // Key
-        char *temp = NULL;
-        while (!temp) temp = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
+    // Key
+    char *temp = NULL;
+    while (!temp) temp = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
 
-        // Join word 1 to word 2 with a space in between
-        strcpy(temp, w1);
-        strcat(temp, " ");
-        strcat(temp, w2);
+    // Join word 1 to word 2 with a space in between
+    strcpy(temp, w1);
+    strcat(temp, " ");
+    strcat(temp, w2);
 
-        entry->key = temp;
+    entry->key = temp;
 
-        // Occurance
-        occ *count = NULL;
-        while (!count) count = (occ*)malloc(sizeof(occ));
-        count->x = 1;
-        entry->val = count;
+    // Occurance
+    occ *count = NULL;
+    while (!count) count = (occ*)malloc(sizeof(occ));
+    count->x = 1;
+    entry->val = count;
 
-        return entry;
+    return entry;
 }
 
 void* increaseOcc(void *v1, void *v2) {
@@ -78,21 +78,27 @@ void readFile(table *ht, char *fn) {
     fclose(fd);
 }
 
-void printAllWordPairs(table *ht) {
+kv** convertHashTableToSortedArray(table *ht) {
+    kv **arr = NULL;
+    while (!arr) arr = (kv**)malloc(sizeof(kv*)*ht->numEntries);
+
+    // copy ht entries into arr
+    unsigned long jj = 0;
     for (unsigned long ii = 0; ii < ht->size; ii++) {
         kv *entry = ht->array[ii];
 
-        // puts("test");
-
         while (entry) {
-            printf("%10d %s\n", ((occ*)(((kv*)entry)->val))->x, entry->key);
+            arr[jj++] = entry;
             entry = entry->next;
         }
     }
+
+    return arr;
 }
 
-void printWordPairs(table *ht, unsigned long count) {
-    for (unsigned long ii = 0; ii < count; ii++){
-        puts("Word Pairs");
+void printWordPairs(kv **arr, unsigned long size) {
+    for (unsigned long ii = 0; ii < size; ii++) {
+        kv *entry = arr[ii];
+        printf("%10ld %s\n", ((occ*)(((kv*)entry)->val))->x, entry->key);
     }
 }

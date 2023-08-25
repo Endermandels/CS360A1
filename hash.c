@@ -64,6 +64,7 @@ void insert(table *ht, kv *entry, void *sameKey(void *v1, void *v2),
                 // collision
                 existing->next = entry;
                 ht->numCollisions++;
+                ht->numEntries++;
                 break;
             }
 
@@ -72,9 +73,8 @@ void insert(table *ht, kv *entry, void *sameKey(void *v1, void *v2),
     } else {
         // add new entry to array
         ht->array[index] = entry;
+        ht->numEntries++;
     }
-
-    ht->numEntries++;
 }
 
 // UNUSED
