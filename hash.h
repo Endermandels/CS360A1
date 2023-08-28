@@ -31,30 +31,37 @@ typedef struct TABLE {
     struct KV **array; // Array of KV entries
     unsigned long size; // Size of array
     float avgNumCollisions; // Stat for when to grow table
-    unsigned long numCollisions; // Stat for when to grow table
+    double numCollisions; // Stat for when to grow table
     unsigned long numEntries; // Stat for when to grow table
+    short growing; // Whether the table is growing
 } table;
 
 /*
-Initialize a new hash table with a size of <size>.
+Initialize a new hash table (or an existing hash table <ht>) with a size of <size>.
 If <size> is 0, use the default size of 256.
 
 @return initialized hash table
 */
-table* initTable(unsigned long size);
+table* initTable(unsigned long size, table *ht);
 
 /*
 Hash new entry into hash table.
-If an entry in the hash table with the same key as the new entry already exists,
-    perform <sameKey>, which should return the new value of the existing entry.
+
+@return <entry>'s old next pointer
 */
-void insert(table *ht, kv *entry, void *sameKey(void *v1, void *v2),
-    void freeKey(void *_ptr), void freeVal(void *_ptr));
+kv* insert(table *ht, kv *entry);
 
 /*
 Get the value indicated by the specified key stored in the table.
+
+@return val or NULL
 */
-void* get(table *ht, char *key);
+void* find(table *ht, char *key);
+
+/*
+Grow the hash table <ht> when the average number of collisions exceeds 75%.
+*/
+void grow(table *ht);
 
 /*
 Free <ht> and all entries inside <ht>.

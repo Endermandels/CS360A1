@@ -45,14 +45,12 @@ void parseArgs(table *ht, int argc, char const *argv[]) {
         }
     }
 
-    kv **arr = convertHashTableToSortedArray(ht);
+    kv *arr = convertHashTableToSortedArray(ht);
 
     if (countEntered) {
-        puts("count");
         // Print <count> word pairs
         printWordPairs(arr, min(count, ht->numEntries));
     } else {
-        puts("num entries");
         // Print all word pairs
         printWordPairs(arr, ht->numEntries);
     }
@@ -65,7 +63,7 @@ int main(int argc, char const *argv[])
     // must include at least one file name
     assert(argc > 1);
 
-    table *ht = initTable(20);
+    table *ht = initTable(1, NULL);
 
     parseArgs(ht, argc, argv);
 

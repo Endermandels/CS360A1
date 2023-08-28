@@ -37,3 +37,6 @@ runv1: $(EXEC)
 
 runv2: $(EXEC)
 	valgrind ./$(EXEC) gettysburg.txt dracula.txt
+
+runv3: $(EXEC)
+	valgrind ./$(EXEC) -5 mobydick.txt

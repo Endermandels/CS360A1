@@ -30,11 +30,11 @@ Convert the hash table <ht> to an array sorted in decreasing order of occurance.
 
 @return sorted array
 */
-kv** convertHashTableToSortedArray(table *ht);
+kv* convertHashTableToSortedArray(table *ht);
 
 /*
 Print <size> entries in array in decreasing order of occurance.
 */
-void printWordPairs(kv **arr, unsigned long size);
+void printWordPairs(kv *arr, unsigned long size);
 
 #endif
