@@ -28,4 +28,9 @@ To run:
 
 ## Description
 
+This program counts the occurances of subsequent word pairs in the specified files.
 
+It then prints out a specified number of the most-encountered words using the <-count> option.
+If <-count> is left out, all word pairs are printed out from most-encountered to least encountered.
+
+This program uses a separate chaining hash table to store all word pairs and their occurances.
