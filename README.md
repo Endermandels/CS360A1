@@ -13,11 +13,17 @@ main.c hash.c hash.h wordPairCounting.c wordPairCounting.h getWord.c getWord.h c
 ## Execution
 
 Compiler used: gcc
+
 To compile using Makefile:
+
     $ make
+
 To clean up object files and executable:
+
     $ make clean
+
 To run:
+
     $ ./pairsofwords <-count> filename1 <filename2> <filename3> ...
 
 ## Description
