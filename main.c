@@ -4,11 +4,11 @@ Assignment 1
 CS 360
 Elijah Delavar
 
-Files: TODO
-
-Description: TODO
+Files:
+    main.c hash.c hash.h wordPairCounting.c wordPairCounting.h getWord.c getWord.h crc.c crc.h README.md Makefile
 */
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,24 +17,33 @@ Description: TODO
 #define min(x,y) ((x)<(y))?(x):(y)
 
 
-void parseArgs(table *ht, int argc, char const *argv[]) {
-    unsigned long count = 100; // number of most-encountered word pairs to print
+void parseArgs(table *ht, int argc, const char *argv[]) {
+    unsigned long count = 0; // number of most-encountered word pairs to print
     short countEntered = 0; // whether the user has inputted a specified count
 
     // loop through args
     for (unsigned long ii = 1; ii < argc; ii++) {
-        char *arg = argv[ii];
+        const char *arg = argv[ii];
         if (arg[0] == '-') {
             // -count must not be empty
-            assert(arg[1]);
+            if (!arg[1]) {
+                fprintf(stderr, "Count must contain a valid number\n");
+                exit(1);
+            }
 
             // -count must be first argument, if specified
-            assert(ii == 1);
+            if (ii > 1) {
+                fprintf(stderr, "Count must be first argument, if specified\n");
+                exit(1);
+            }
 
             // check if count is a valid number
             unsigned long len = strlen(arg);
             for (unsigned long jj = 1; jj < len; jj++) {
-                assert(arg[jj] >= '0' && arg[jj] <= '9');
+                if (arg[jj] < '0' || arg[jj] > '9') {
+                    fprintf(stderr, "Count must only contain numerical digits\n");
+                    exit(1);
+                }
             }
 
             // register count
@@ -45,28 +54,30 @@ void parseArgs(table *ht, int argc, char const *argv[]) {
         }
     }
 
-    kv *arr = convertHashTableToSortedArray(ht);
-
     if (countEntered) {
         // Print <count> word pairs
-        printWordPairs(arr, min(count, ht->numEntries));
+        printWordPairs(ht, min(count, ht->numEntries));
     } else {
         // Print all word pairs
-        printWordPairs(arr, ht->numEntries);
+        printWordPairs(ht, ht->numEntries);
     }
-
-    free(arr);
 }
 
 int main(int argc, char const *argv[])
 {
     // must include at least one file name
-    assert(argc > 1);
+    if (argc < 2) {
+        fprintf(stderr, "Must include at least one file name\n");
+        exit(1);
+    }
 
-    table *ht = initTable(1, NULL);
+    // create hash table
+    table *ht = initTable(256, NULL);
 
+    // read word pairs into hash table
     parseArgs(ht, argc, argv);
 
+    // free hash table
     freeTable(ht, free, free);
 
     return 0;

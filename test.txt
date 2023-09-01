@@ -1,2 +1,0 @@
-This is a test text file.
-Let's see how well this test text file serves us.

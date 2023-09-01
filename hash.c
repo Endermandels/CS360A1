@@ -4,15 +4,15 @@ Assignment 1
 CS 360
 Elijah Delavar
 
-Files: TODO
-
-Description: TODO
+Files:
+    main.c hash.c hash.h wordPairCounting.c wordPairCounting.h getWord.c getWord.h crc.c crc.h README.md Makefile
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "crc64.h" // Contains hash code function
 #include "hash.h"
 
@@ -22,7 +22,6 @@ table* initTable(unsigned long size, table *ht) {
     }
 
     ht->array = NULL;
-    ht->avgNumCollisions = 0;
     ht->numCollisions = 0;
     ht->numEntries = 0;
     ht->growing = 0;
@@ -33,87 +32,40 @@ table* initTable(unsigned long size, table *ht) {
         ht->size = size;
     }
 
-    while (!ht->array) ht->array = (kv**)malloc(sizeof(kv*)*ht->size);
-
-    for (unsigned long ii = 0; ii < ht->size; ii++) {
-        ht->array[ii] = NULL;
-    }
+    while (!ht->array) ht->array = (kv**)calloc(ht->size, sizeof(kv*));
 
     return ht;
 }
 
-kv* insert(table *ht, kv *entry) {
-    assert(ht);
-    assert(entry);
+/*
+Grow the hash table <ht> when the number of collisions per bucket is greater than 1.
 
-    // save entry's next for easier growing
-    kv *oldNext = entry->next;
-    entry->next = NULL;
+I tested 2 ways of growing the array:
+    average number of collisions across the buckets
+    average number of collisions across the number of entries
 
-    // hash into ht
-    unsigned long index = crc64(entry->key) % ht->size;
+In each test I ran the program with 10 Moby Dick files.
+The first test ran for a rough average of 17 seconds.
+The second test ran for a rough average of 19 seconds.
 
-    kv *existing = ht->array[index];
-    if (existing) {
-        // go to end of existing's linked list
-        while (existing) {
-            if (!existing->next) {
-                // Collision
-                existing->next = entry;
-                ht->numCollisions++;
-                break;
-            }
-            existing = existing->next;
-        }
-    } else {
-        // add new entry to array
-        ht->array[index] = entry;
-    }
-    
-    ht->numEntries++;
+I tested 4 different thresholds:
+    0.3
+    1
+    5
+    50
 
-    // check for grow
-    grow(ht);
-
-    return oldNext;
-}
-
-void* find(table *ht, char *key) {
-    assert(ht);
-    assert(key);
-    
-    // hash into array
-    unsigned long index = crc64(key) % ht->size;
-
-    kv *existing = ht->array[index];
-
-    if (existing) {
-        while (existing) {
-            if (!strcmp(existing->key, key)) {
-                return existing->val;
-            }
-            existing = existing->next;
-        }
-    }
-
-    return NULL;
-}
-
+A threshold of 1 performed best by roughly 1 second.
+*/
 void grow(table *ht) {
     assert(ht);
-    
-    // do not grow if already growing
-    if (ht->growing) {
-        return;
-    }
 
-    ht->avgNumCollisions = (float)(ht->numCollisions / ht->numEntries);
+    float avgNumCollisions = (float)(ht->numCollisions / ht->size);
 
-    if (ht->avgNumCollisions > 0.75) {
+    if (avgNumCollisions > 1) {
         // grow array
         kv **oldArr = ht->array;
         unsigned long oldSize = ht->size;
-        initTable(ht->size*3, ht);
+        initTable(ht->size*3, ht); // reset hash table attributes and grow hash table array
         ht->growing = 1;
 
         for (unsigned long ii = 0; ii < oldSize; ii++) {
@@ -129,6 +81,55 @@ void grow(table *ht) {
 
         free(oldArr);
     }
+}
+
+kv* insert(table *ht, kv *entry) {
+    assert(ht);
+    assert(entry);
+
+    // save entry's next for easier growing
+    kv *oldNext = entry->next;
+    entry->next = NULL;
+
+    // hash into ht
+    unsigned long index = crc64(entry->key) % ht->size;
+
+    // insert new entry at beginning of Linked List
+    kv *existing = ht->array[index];
+    
+    if (existing) {
+        entry->next = existing;
+        ht->numCollisions++;
+    }
+    
+    ht->array[index] = entry;
+    ht->numEntries++;
+
+    // check for grow
+    if (!ht->growing) {
+        grow(ht);
+    }
+
+    return oldNext;
+}
+
+void* find(table *ht, char *key) {
+    assert(ht);
+    assert(key);
+    
+    // hash into array
+    unsigned long index = crc64(key) % ht->size;
+
+    kv *existing = ht->array[index];
+
+    while (existing) {
+        if (!strcmp(existing->key, key)) {
+            return existing->val;
+        }
+        existing = existing->next;
+    }
+
+    return NULL;
 }
 
 void freeTable(table *ht, void freeKey(void *__ptr), void freeVal(void *__ptr)) {

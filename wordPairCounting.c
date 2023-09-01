@@ -4,9 +4,8 @@ Assignment 1
 CS 360
 Elijah Delavar
 
-Files: TODO
-
-Description: TODO
+Files:
+    main.c hash.c hash.h wordPairCounting.c wordPairCounting.h getWord.c getWord.h crc.c crc.h README.md Makefile
 */
 
 #include <stdio.h>
@@ -17,6 +16,8 @@ Description: TODO
 #include "getWord.h"
 
 kv *newEntry(char *key) {
+    assert(key);
+
     // Init entry
     kv *entry = NULL;
     while (!entry) entry = (kv*)malloc(sizeof(kv));
@@ -26,7 +27,8 @@ kv *newEntry(char *key) {
     entry->next = NULL;
 
     // Key
-    entry->key = key;
+    while (!entry->key) entry->key = (char*)malloc(sizeof(char)*strlen(key)+1);
+    strcpy(entry->key, key);
 
     // Occurance
     occ *count = NULL;
@@ -38,12 +40,31 @@ kv *newEntry(char *key) {
 }
 
 void readWordPairs(table *ht, FILE *fd) {
+    assert(ht);
+    assert(fd);
+
     char *w1 = getNextWord(fd);
     char *w2 = getNextWord(fd);
+    if (!w2) {
+        return;
+    }
+
+    // Key used for concatenating the two words together.
+    char *key = NULL;
+    size_t keyLen = strlen(w1) + strlen(w2) + 2;
+    while (!key) key = (char*)malloc(sizeof(char)*keyLen);
 
     while (w2) {
-        char *key = NULL;
-        while (!key) key = (char*)malloc(sizeof(char)*(strlen(w1) + strlen(w2) + 2));
+        size_t len1 = strlen(w1);
+        size_t len2 = strlen(w2);
+
+        if (len1 + len2 + 2 > keyLen) {
+            // resize key
+            keyLen = len1 + len2 + 2;
+            char *temp = NULL;
+            while (!temp) temp = (char*)realloc(key, sizeof(char)*keyLen);
+            key = temp;
+        }
 
         // Join word 1 to word 2 with a space in between
         strcpy(key, w1);
@@ -55,26 +76,35 @@ void readWordPairs(table *ht, FILE *fd) {
         if (existingVal) {
             // Increase occurance
             existingVal->x += 1;
-            free(key);
         } else {
             // Insert new entry
             insert(ht, newEntry(key));
         }
-        free(w1); // free w1 since it is malloc'd memory
+        
+        // free w1 since it is malloc'd memory
+        free(w1);
+
+        // word pairs are subsequent, so the second word becomes the first word
         w1 = w2;
         w2 = getNextWord(fd);
     }
+
+    free(key);
 
     if (w1){
         free(w1);
     }
 }
 
-void readFile(table *ht, char *fn) {
+void readFile(table *ht, const char *fn) {
+    assert(ht);
     assert(fn);
 
     FILE *fd = fopen(fn, "r");
-    assert(fd);
+    if (!fd) {
+        fprintf(stderr, "Could not open file with file name <%s>\n", fn);
+        exit(1);
+    }
 
     readWordPairs(ht, fd);
 
@@ -82,6 +112,9 @@ void readFile(table *ht, char *fn) {
 }
 
 int compar(const void *p1, const void *p2) {
+    assert(p1);
+    assert(p2);
+
     kv *e1 = (kv*)p1;
     kv *e2 = (kv*)p2;
 
@@ -94,7 +127,14 @@ int compar(const void *p1, const void *p2) {
     return 0;
 }
 
+/*
+Convert the hash table <ht> to an array sorted in decreasing order of occurance.
+
+@return sorted array
+*/
 kv* convertHashTableToSortedArray(table *ht) {
+    assert(ht);
+
     kv *arr = NULL;
     while (!arr) arr = (kv*)malloc(sizeof(kv)*ht->numEntries);
 
@@ -115,9 +155,15 @@ kv* convertHashTableToSortedArray(table *ht) {
     return arr;
 }
 
-void printWordPairs(kv *arr, unsigned long size) {
+void printWordPairs(table *ht, unsigned long size) {
+    assert(ht);
+
+    kv *arr = convertHashTableToSortedArray(ht);
+
     for (unsigned long ii = 0; ii < size; ii++) {
         kv entry = arr[ii];
         printf("%10ld %s\n", ((occ*)(entry.val))->x, entry.key);
     }
+
+    free(arr);
 }

@@ -4,9 +4,13 @@ Assignment 1
 CS 360
 Elijah Delavar
 
-Files: TODO
+Files:
+    main.c hash.c hash.h wordPairCounting.c wordPairCounting.h getWord.c getWord.h crc.c crc.h README.md Makefile
 
-Description: TODO
+Description:
+    This file contains functions which:
+    - retrieve word pairs from text files and store those word pairs in a hash table
+    - print word pairs from a hash table in descending order of occurrance
 */
 
 #ifndef WPC
@@ -23,18 +27,11 @@ typedef struct OCCURANCES {
 Read the file located at fn.
 Load word pairs as key-value pairs into hashtable <ht>.
 */
-void readFile(table *ht, char *fn);
+void readFile(table *ht, const char *fn);
 
 /*
-Convert the hash table <ht> to an array sorted in decreasing order of occurance.
-
-@return sorted array
+Print <size> entries of hash table <ht> in decreasing order of occurance.
 */
-kv* convertHashTableToSortedArray(table *ht);
-
-/*
-Print <size> entries in array in decreasing order of occurance.
-*/
-void printWordPairs(kv *arr, unsigned long size);
+void printWordPairs(table *ht, unsigned long size);
 
 #endif
