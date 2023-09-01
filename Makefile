@@ -33,4 +33,4 @@ clean:
 	rm $(EXEC)
 
 run: $(EXEC)
-	./$(EXEC)
+	./$(EXEC) mobydick.txt
