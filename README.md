@@ -1,4 +1,4 @@
-# Assignment 1
+# Assignment 1 - Counting Words Using a Hash Table
 
 ### CS 360
 
